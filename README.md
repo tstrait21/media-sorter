@@ -97,6 +97,27 @@ This project uses `ruff` for linting and `unittest` for testing. The `Makefile` 
   make lint
   ```
 
+## Building an Executable
+
+You can build a standalone executable for the application using PyInstaller. This allows you to run the sorter without needing to have Python or any dependencies installed.
+
+1.  **Install the build dependencies:**
+    Make sure you have the Conda environment activated.
+
+2.  **Build the executable:**
+    ```bash
+    make build
+    ```
+    The executable will be created in the `dist` directory.
+
+### Running the Executable
+
+Once built, you can run the executable directly:
+
+```bash
+./dist/media-sorter path/to/source_directory path/to/target_directory
+```
+
 ## Extending the Code
 
 The architecture makes it easy to extend the application.
