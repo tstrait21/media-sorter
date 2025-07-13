@@ -81,25 +81,49 @@ class TestMediaSorterService(unittest.TestCase):
         self.assertFalse(self.fs.file_exists(unsorted_dir / "document.pdf"))
 
 
-    @patch('logging.warning')
-    def test_skips_file_if_already_exists_in_target(self, mock_log_warning):
+    @patch('logging.info')
+    def test_replaces_file_if_source_is_larger(self, mock_log_info):
         # Arrange
         file_path = self.source_dir / "duplicate.jpg"
         creation_time = datetime(2023, 10, 22)
-        self.fs.add_file(file_path, content="new")
+        self.fs.add_file(file_path, content="new_larger_content")
         self.reader.set_creation_time(file_path, creation_time)
 
         # Pre-populate the destination
         existing_dest = self.target_dir / "2023" / "10-October" / "duplicate.jpg"
         self.fs.add_file(existing_dest, content="original")
+        self.reader.set_creation_time(existing_dest, creation_time)
 
         # Act
         self.service.execute(self.source_dir, self.target_dir)
 
         # Assert
-        self.assertEqual(self.fs.files[existing_dest], "original")
+        self.assertEqual(self.fs.files[existing_dest], "new_larger_content")
+        mock_log_info.assert_called_with(
+            f"Replaced {existing_dest.name} with a larger version from {file_path.parent}"
+        )
+
+    @patch('logging.warning')
+    def test_skips_file_if_source_is_smaller_or_equal(self, mock_log_warning):
+        # Arrange
+        file_path = self.source_dir / "duplicate.jpg"
+        creation_time = datetime(2023, 10, 22)
+        self.fs.add_file(file_path, content="small")
+        self.reader.set_creation_time(file_path, creation_time)
+
+        # Pre-populate the destination
+        existing_dest = self.target_dir / "2023" / "10-October" / "duplicate.jpg"
+        self.fs.add_file(existing_dest, content="original_larger")
+        self.reader.set_creation_time(existing_dest, creation_time)
+
+        # Act
+        self.service.execute(self.source_dir, self.target_dir)
+
+        # Assert
+        self.assertEqual(self.fs.files[existing_dest], "original_larger")
         mock_log_warning.assert_called_with(
-            f"Skipping duplicate.jpg as it already exists in {existing_dest.parent}"
+            f"Skipping {file_path.name} as a file with the same name and larger or equal size "
+            f"already exists in {existing_dest.parent}"
         )
 
     @patch('logging.warning')
@@ -111,15 +135,17 @@ class TestMediaSorterService(unittest.TestCase):
 
         # Pre-populate the destination
         existing_dest = self.target_dir / "unsorted" / "duplicate_unsorted.txt"
-        self.fs.add_file(existing_dest, content="original")
+        self.fs.add_file(existing_dest, content="original_larger")
+        self.reader.set_creation_time(existing_dest, None)
 
         # Act
         self.service.execute(self.source_dir, self.target_dir)
 
         # Assert
-        self.assertEqual(self.fs.files[existing_dest], "original")
+        self.assertEqual(self.fs.files[existing_dest], "original_larger")
         mock_log_warning.assert_called_with(
-            f"Skipping duplicate_unsorted.txt as it already exists in {existing_dest.parent}"
+            f"Skipping {file_path.name} as a file with the same name and larger or equal size "
+            f"already exists in {existing_dest.parent}"
         )
 
     def test_source_directory_is_unmodified(self):

@@ -28,6 +28,11 @@ class FileSystem(ABC):
         """Checks if a file exists."""
         pass
 
+    @abstractmethod
+    def get_file_size(self, file_path: Path) -> int:
+        """Gets the size of a file in bytes."""
+        pass
+
 
 class MetadataReader(ABC):
     """

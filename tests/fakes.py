@@ -27,6 +27,9 @@ class FakeFileSystem(FileSystem):
     def file_exists(self, file_path: Path) -> bool:
         return file_path in self.files
 
+    def get_file_size(self, file_path: Path) -> int:
+        return len(self.files.get(file_path, b""))
+
     # Helper methods for tests
     def add_file(self, path: Path, content: str = ""):
         self.files[path] = content

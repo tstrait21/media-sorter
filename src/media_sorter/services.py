@@ -25,7 +25,8 @@ class MediaSorterService:
         """
         for file_path in self._fs.list_files(source_dir, self._supported_extensions):
             creation_time = self._reader.get_creation_time(file_path)
-            media_file = MediaFile(path=file_path, creation_time=creation_time)
+            size = self._fs.get_file_size(file_path)
+            media_file = MediaFile(path=file_path, creation_time=creation_time, size=size)
 
             if media_file.is_sortable:
                 self._sort_file(media_file, target_dir)
@@ -45,7 +46,7 @@ class MediaSorterService:
         dest_file = dest_subdir / media_file.path.name
 
         if self._fs.file_exists(dest_file):
-            logging.warning(f"Skipping {media_file.path.name} as it already exists in {dest_subdir}")
+            self._handle_duplicate(media_file, dest_file)
         else:
             self._fs.copy_file(media_file.path, dest_file)
             logging.info(f"Copied {media_file.path.name} to {dest_subdir}")
@@ -57,7 +58,32 @@ class MediaSorterService:
         dest_file = unsorted_subdir / media_file.path.name
 
         if self._fs.file_exists(dest_file):
-            logging.warning(f"Skipping {media_file.path.name} as it already exists in {unsorted_subdir}")
+            self._handle_duplicate(media_file, dest_file)
         else:
             self._fs.copy_file(media_file.path, dest_file)
             logging.warning(f"Could not read creation_time from {media_file.path.name}. Copied to {unsorted_subdir}")
+
+    def _handle_duplicate(self, source_media_file: MediaFile, dest_file_path: Path):
+        """
+        Handles cases where a file with the same name already exists in the destination.
+        Compares metadata to decide whether to replace the existing file.
+        """
+        dest_creation_time = self._reader.get_creation_time(dest_file_path)
+        if source_media_file.creation_time != dest_creation_time:
+            logging.warning(
+                f"Skipping {source_media_file.path.name} as a file with the same name but different creation time "
+                f"already exists in {dest_file_path.parent}"
+            )
+            return
+
+        dest_file_size = self._fs.get_file_size(dest_file_path)
+        if source_media_file.size > dest_file_size:
+            self._fs.copy_file(source_media_file.path, dest_file_path)
+            logging.info(
+                f"Replaced {dest_file_path.name} with a larger version from {source_media_file.path.parent}"
+            )
+        else:
+            logging.warning(
+                f"Skipping {source_media_file.path.name} as a file with the same name and larger or equal size "
+                f"already exists in {dest_file_path.parent}"
+            )

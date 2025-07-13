@@ -25,3 +25,6 @@ class LocalFileSystem(FileSystem):
 
     def file_exists(self, file_path: Path) -> bool:
         return file_path.exists()
+
+    def get_file_size(self, file_path: Path) -> int:
+        return file_path.stat().st_size

@@ -11,6 +11,7 @@ class MediaFile:
     """
     path: Path
     creation_time: datetime | None = None
+    size: int = 0
 
     @property
     def is_sortable(self) -> bool:
