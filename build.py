@@ -7,4 +7,5 @@ if __name__ == "__main__":
         '--name=media-sorter',
         '--distpath=./dist',
         '--workpath=./build',
+        '--paths=./src',
     ])
