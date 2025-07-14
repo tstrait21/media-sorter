@@ -11,7 +11,7 @@ class LocalFileSystem(FileSystem):
 
     def list_files(self, directory: Path, extensions: list[str]) -> list[Path]:
         return [
-            path for path in directory.iterdir()
+            path for path in directory.rglob('*')
             if path.is_file() and
             not path.name.startswith('.') and
             path.suffix.lower() in extensions
