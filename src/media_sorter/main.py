@@ -3,7 +3,7 @@ import configparser
 import logging
 from pathlib import Path
 
-from media_sorter.infrastructure.hachoir_metadata_reader import HachoirMetadataReader
+from media_sorter.infrastructure.default_metadata_reader import DefaultMetadataReader
 from media_sorter.infrastructure.local_file_system import LocalFileSystem
 from media_sorter.services import MediaSorterService
 
@@ -29,7 +29,7 @@ def main():
 
     # Instantiate adapters
     file_system = LocalFileSystem()
-    metadata_reader = HachoirMetadataReader()
+    metadata_reader = DefaultMetadataReader()
 
     # Check if source directory exists
     if not args.source_dir.is_dir():

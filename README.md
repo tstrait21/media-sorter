@@ -124,34 +124,33 @@ The architecture makes it easy to extend the application.
 
 ### Example: Adding a New Metadata Reader
 
-If you wanted to use a different library (e.g., `exifread`), you would:
+If you wanted to use a different library, you would:
 
 1.  **Create a new infrastructure component:**
-    Create a new file, `src/media_sorter/infrastructure/exif_reader.py`, that implements the `MetadataReader` interface from `interfaces.py`.
+    Create a new file, `src/media_sorter/infrastructure/my_reader.py`, that implements the `MetadataReader` interface from `interfaces.py`.
 
     ```python
-    # src/media_sorter/infrastructure/exif_reader.py
+    # src/media_sorter/infrastructure/my_reader.py
     from media_sorter.interfaces import MetadataReader
-    import exifread
 
-    class ExifReader(MetadataReader):
+    class MyReader(MetadataReader):
         def get_creation_time(self, file_path):
-            # Your implementation using exifread
+            # Your implementation
             ...
     ```
 
 2.  **Update the Composition Root:**
-    In `src/media_sorter/main.py`, swap out the `HachoirMetadataReader` with your new implementation.
+    In `src/media_sorter/main.py`, swap out the `DefaultMetadataReader` with your new implementation.
 
     ```python
     # src/media_sorter/main.py
-    # from media_sorter.infrastructure.hachoir_metadata_reader import HachoirMetadataReader
-    from media_sorter.infrastructure.exif_reader import ExifReader
+    # from media_sorter.infrastructure.default_metadata_reader import DefaultMetadataReader
+    from media_sorter.infrastructure.my_reader import MyReader
 
     def main():
         ...
-        # metadata_reader = HachoirMetadataReader()
-        metadata_reader = ExifReader()
+        # metadata_reader = DefaultMetadataReader()
+        metadata_reader = MyReader()
         ...
     ```
 No other part of the application needs to change. The `MediaSorterService` remains completely unaware of the underlying implementation details.
