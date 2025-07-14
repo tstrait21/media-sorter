@@ -14,7 +14,7 @@ class FakeFileSystem(FileSystem):
     def list_files(self, directory: Path, extensions: list[str]) -> list[Path]:
         return [
             p for p in self.files
-            if p.parent == directory and p.suffix.lower() in extensions
+            if p.suffix.lower() in extensions and str(p).startswith(str(directory))
         ]
 
     def copy_file(self, source: Path, destination: Path):

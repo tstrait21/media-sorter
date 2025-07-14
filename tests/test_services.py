@@ -164,6 +164,22 @@ class TestMediaSorterService(unittest.TestCase):
         initial_source_files = {p for p in initial_source_contents if p.parent == self.source_dir}
         self.assertEqual(initial_source_files, final_source_contents)
 
+    def test_sorts_file_from_subdirectory(self):
+        # Arrange
+        sub_dir = self.source_dir / "sub"
+        self.fs.create_directory(sub_dir)
+        file_path = sub_dir / "nested_image.jpg"
+        creation_time = datetime(2024, 1, 1)
+        self.fs.add_file(file_path)
+        self.reader.set_creation_time(file_path, creation_time)
+
+        # Act
+        self.service.execute(self.source_dir, self.target_dir)
+
+        # Assert
+        expected_dest = self.target_dir / "2024" / "01-January" / "nested_image.jpg"
+        self.assertTrue(self.fs.file_exists(expected_dest))
+
 
 if __name__ == '__main__':
     unittest.main()
