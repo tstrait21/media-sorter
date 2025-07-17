@@ -8,4 +8,6 @@ if __name__ == "__main__":
         '--distpath=./dist',
         '--workpath=./build',
         '--paths=./src',
+        '--hidden-import=tinytag',
+        '--hidden-import=exifread'
     ])
